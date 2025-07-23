@@ -1,6 +1,6 @@
 # .github/workflows/ci.yml
 
-name: Python CI
+name: Python CI with Allure
 
 on:
   push:
@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ✅ 获取最新代码
+      - name: ✅ 获取代码
         uses: actions/checkout@v3
 
-      - name: 🐍 安装 Python
+      - name: 🐍 设置 Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
@@ -26,6 +26,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🧪 执行测试
+      - name: 🧪 执行测试并生成 Allure 结果
         run: |
-          pytest -v
+          pytest --alluredir=allure-results
+
+      - name: 📦 打包测试报告结果
+        if: always()  # 即使测试失败也会执行
+        run: |
+          zip -r allure-report.zip allure-results
+          
+      - name: 💾 保存测试报告为 artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: allure-report.zip
