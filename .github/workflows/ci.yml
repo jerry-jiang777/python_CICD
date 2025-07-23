@@ -40,17 +40,21 @@ jobs:
           path: allure-report.zip
 
 
-      - name: 🔔 飞书通知（失败时）
-        if: failure()
+      - name: 🔔 飞书通知（总是发送）
+        if: always()
         run: |
+          STATUS="${{ job.status }}"
+          MSG="CI/CD 任务完成，当前状态：${STATUS}\n项目: ${{ github.repository }}\n分支: ${{ github.ref }}\n提交: ${{ github.sha }}"
+
           curl -X POST ${{ secrets.FEISHU_WEBHOOK }} \
           -H "Content-Type: application/json" \
-          -d '{
-            "msg_type": "text",
-            "content": {
-              "text": "CI/CD ❌ 失败啦！请尽快查看。\n项目: '${{ github.repository }}'\n分支: '${{ github.ref }}'\n提交: '${{ github.sha }}'"
+          -d "{
+            \"msg_type\": \"text\",
+            \"content\": {
+              \"text\": \"$MSG\"
             }
-          }'
+          }"
+
 
 
       - name: 📧 邮件通知（失败时发送）
