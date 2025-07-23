@@ -1,6 +1,5 @@
 # test_main.py
 
-
 import allure
 @allure.epic("CI验证")
 @allure.feature("简单功能")

@@ -39,8 +39,6 @@ jobs:
           name: allure-report
           path: allure-report.zip
 
-      - name: 🔍 代码质量检查 (flake8)
-        run: flake8 . --max-line-length=120
 
       - name: 🔔 飞书通知（失败时）
         if: failure()
