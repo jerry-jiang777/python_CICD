@@ -1,4 +1,4 @@
-name: Python CI with Allure
+name: Python CI/CD
 
 on:
   push:
@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ✅ 获取代码
+      - name: ✅ Checkout 代码
         uses: actions/checkout@v3
 
-      - name: 🐍 设置 Python
+      - name: 🐍 设置 Python 环境
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.10'
 
       - name: 📦 安装依赖
         run: |
@@ -26,16 +26,45 @@ jobs:
 
       - name: 🧪 执行测试并生成 Allure 结果
         run: |
-          pytest --alluredir=allure-results
+          pytest tests/ --alluredir=allure-results
 
-      - name: 📦 打包测试报告结果
-        if: always()  # 即使测试失败也会执行
-        run: |
-          zip -r allure-report.zip allure-results
-
-      - name: 💾 保存测试报告为 artifact
+      - name: 🧵 打包 Allure 测试报告
         if: always()
-        uses: actions/upload-artifact@v4
+        run: zip -r allure-report.zip allure-results
+
+      - name: 💾 上传 Allure 报告
+        if: always()
+        uses: actions/upload-artifact@v3
         with:
           name: allure-report
           path: allure-report.zip
+
+      - name: 🔍 代码质量检查 (flake8)
+        run: flake8 . --max-line-length=120
+
+      - name: 🔔 企业微信通知（失败时触发）
+        if: failure()
+        uses: xuexb/qy-wechat-robot-action@v1
+        with:
+          content: |
+            ❌ 测试失败！
+            Repo: ${{ github.repository }}
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+          webhook: ${{ secrets.WEBHOOK_URL }}
+
+      - name: 📧 邮件通知（失败时发送）
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.qq.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: 🚨 项目测试失败报告
+          body: |
+            仓库：${{ github.repository }}
+            分支：${{ github.ref }}
+            提交：${{ github.sha }}
+          to: ${{ secrets.EMAIL_TO }}
+          from: GitHub Action
