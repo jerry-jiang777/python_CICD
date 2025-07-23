@@ -42,16 +42,18 @@ jobs:
       - name: 🔍 代码质量检查 (flake8)
         run: flake8 . --max-line-length=120
 
-      - name: 🔔 企业微信通知（失败时触发）
+      - name: 🔔 飞书通知（失败时）
         if: failure()
-        uses: xuexb/qy-wechat-robot-action@v1
-        with:
-          content: |
-            ❌ 测试失败！
-            Repo: ${{ github.repository }}
-            Branch: ${{ github.ref }}
-            Commit: ${{ github.sha }}
-          webhook: ${{ secrets.WEBHOOK_URL }}
+        run: |
+          curl -X POST ${{ secrets.FEISHU_WEBHOOK }} \
+          -H "Content-Type: application/json" \
+          -d '{
+            "msg_type": "text",
+            "content": {
+              "text": "CI/CD ❌ 失败啦！请尽快查看。\n项目: '${{ github.repository }}'\n分支: '${{ github.ref }}'\n提交: '${{ github.sha }}'"
+            }
+          }'
+
 
       - name: 📧 邮件通知（失败时发送）
         if: failure()
