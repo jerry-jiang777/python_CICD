@@ -1,0 +1,31 @@
+# .github/workflows/ci.yml
+
+name: Python CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ✅ 获取最新代码
+        uses: actions/checkout@v3
+
+      - name: 🐍 安装 Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: 📦 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🧪 执行测试
+        run: |
+          pytest -v
