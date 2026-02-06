@@ -10,3 +10,4 @@ def test_add():
 @allure.title("模拟失败的用例")
 def test_fail():
     assert 2 + 2 == 6  # 故意失败用例
+    pass_(password)
