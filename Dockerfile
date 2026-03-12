@@ -35,4 +35,4 @@ COPY . .
 # 这是容器启动时默认要执行的命令
 # 假设你的主测试脚本叫run_test.py，这里就写执行它
 # 注意：CMD只能有一条，如果写了多条，只有最后一条生效
-CMD ["python","test_01.py"]
+CMD ["sh","-c","python test_01.py && tail -f /dev/null"]
